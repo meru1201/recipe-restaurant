@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard | Asian Food Explorer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
+</head>
+
+<body>
+    <nav class="glass">
+        <div class="logo">Asian<span>Food</span></div>
+        <div class="nav-toggle" id="navToggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="nav-menu">
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html" class="active">Dashboard</a></li>
+                <li><a href="#" class="btn btn-outline" id="logoutBtn">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="dashboard-header" id="welcomeMessage">
+        <!-- JS will populate this -->
+        <h1>Welcome back!</h1>
+        <p>Manage your recipes and explore new flavors.</p>
+    </div>
+
+    <section class="stats-grid">
+        <div class="stat-card glass">
+            <h3 id="totalRecipes">0</h3>
+            <p>My Recipes</p>
+        </div>
+        <div class="stat-card glass">
+            <h3 id="totalViews">0</h3>
+            <p>Total Views</p>
+        </div>
+        <div class="stat-card glass">
+            <h3 id="avgRating">0.0</h3>
+            <p>Avg Rating</p>
+        </div>
+    </section>
+
+    <section id="recipe-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h2>My Recipes</h2>
+            <a href="add-recipe.html" class="btn btn-primary">+ Add New Recipe</a>
+        </div>
+        <div class="recipe-grid" id="userRecipes">
+            <!-- Recipes will be loaded here -->
+        </div>
+    </section>
+
+    <div id="notification"></div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+
+</html>

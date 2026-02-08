@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asian Food Explorer | Discover Authentic Flavors</title>
+    <meta name="description"
+        content="Explore the best Asian recipes from across the continent. Authentic, delicious, and easy to follow.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <nav class="glass">
+        <div class="logo">Asian<span>Food</span></div>
+        <div class="nav-toggle" id="navToggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="nav-menu">
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="recipes.html">Recipes</a></li>
+                <li id="auth-link"><a href="auth.html" class="btn btn-primary">Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <h1>Discover the Art of <br>Asian Cuisine</h1>
+        <p>From the spicy streets of Bangkok to the delicate flavors of Kyoto, explore authentic recipes shared by food
+            lovers worldwide.</p>
+        <div class="hero-btns">
+            <a href="#recipes" class="btn btn-primary">Start Exploring</a>
+            <a href="add-recipe.html" class="btn btn-outline">Submit a Recipe</a>
+        </div>
+    </header>
+
+    <div class="search-container" style="max-width: 600px; margin: -30px auto 50px; position: relative; z-index: 10;">
+        <div style="position: relative;">
+            <i class="fas fa-search"
+                style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--primary);"></i>
+            <input type="text" id="homeSearch" placeholder="Search for recipes, ingredients, or cuisines..."
+                style="width: 100%; padding: 15px 25px 15px 50px; border-radius: 30px; background: var(--card-bg); color: var(--text-light); border: 1px solid var(--glass-border); font-size: 1.1rem; box-shadow: var(--glow-soft);">
+        </div>
+    </div>
+
+    <section id="recipes">
+        <div class="section-header">
+            <h2>Trending Recipes</h2>
+            <p>Handpicked favorites from our community</p>
+        </div>
+        <div class="recipe-grid" id="recipe-list">
+            <!-- Recipes will be loaded here via JS -->
+            <div class="loading-state" style="text-align: center; grid-column: 1/-1; padding: 40px;">
+                <i class="fas fa-spinner fa-spin"></i> Loading authentic Asian flavors...
+            </div>
+        </div>
+    </section>
+
+    <footer style="text-align: center; padding: 40px; border-top: 1px solid var(--glass-border);">
+        <p>&copy; 2024 Asian Food Explorer. All rights reserved.</p>
+    </footer>
+
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

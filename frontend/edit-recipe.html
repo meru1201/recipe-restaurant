@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Recipe | Asian Food Explorer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
+</head>
+
+<body>
+    <nav class="glass">
+        <div class="logo">Asian<span>Food</span></div>
+        <div class="nav-toggle" id="navToggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="nav-menu">
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="form-section">
+        <div class="glass" style="max-width: 800px; margin: 0 auto; padding: 40px;">
+            <h2>Edit Your Recipe</h2>
+            <p>Update your culinary masterpiece!</p>
+
+            <form id="editRecipeForm" style="margin-top: 30px;">
+                <div class="form-group">
+                    <label>Recipe Title</label>
+                    <input type="text" name="title" id="editTitle" required
+                        placeholder="e.g., Spicy Thai Basil Chicken">
+                </div>
+
+                <div class="form-group">
+                    <label>Recipe Image URL</label>
+                    <input type="url" name="image" id="editImage" placeholder="https://example.com/image.jpg">
+                    <small>Optional: Provide a high-quality image URL for your dish</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Cuisine Type</label>
+                    <select name="cuisineType" id="editCuisine" required>
+                        <option value="Thai">Thai</option>
+                        <option value="Japanese">Japanese</option>
+                        <option value="Chinese">Chinese</option>
+                        <option value="Korean">Korean</option>
+                        <option value="Vietnamese">Vietnamese</option>
+                        <option value="Indian">Indian</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Short Description</label>
+                    <textarea name="description" id="editDescription" required rows="3"
+                        placeholder="A brief overview of your dish..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Ingredients (One per line)</label>
+                    <textarea name="ingredients" id="editIngredients" required rows="5"
+                        placeholder="500g Chicken&#10;2 tbsp Soy Sauce&#10;..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Cooking Instructions</label>
+                    <textarea name="instructions" id="editInstructions" required rows="8"
+                        placeholder="Step 1: Prep the veggies...&#10;Step 2: Heat the wok..."></textarea>
+                </div>
+
+                <div style="display: flex; gap: 20px; margin-top: 30px;">
+                    <button type="submit" class="btn btn-primary">Update Recipe</button>
+                    <a href="dashboard.html" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <div id="notification"></div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const recipeId = urlParams.get('id');
+
+            if (!recipeId) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            // Load original recipe data
+            try {
+                const response = await fetch(`http://localhost:5050/api/recipes/${recipeId}`);
+                if (!response.ok) throw new Error('Recipe not found');
+                const recipe = await response.json();
+
+                document.getElementById('editTitle').value = recipe.title;
+                document.getElementById('editImage').value = recipe.image || '';
+                document.getElementById('editCuisine').value = recipe.cuisineType;
+                document.getElementById('editDescription').value = recipe.description;
+                document.getElementById('editIngredients').value = recipe.ingredients.join('\n');
+                document.getElementById('editInstructions').value = recipe.instructions;
+
+                // Handle form submission
+                document.getElementById('editRecipeForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.target);
+                    const updatedData = {
+                        title: formData.get('title'),
+                        image: formData.get('image'),
+                        cuisineType: formData.get('cuisineType'),
+                        description: formData.get('description'),
+                        ingredients: formData.get('ingredients').split('\n').filter(i => i.trim() !== ''),
+                        instructions: formData.get('instructions')
+                    };
+
+                    const updateResponse = await fetch(`http://localhost:5050/api/recipes/${recipeId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify(updatedData)
+                    });
+
+                    if (updateResponse.ok) {
+                        alert('Recipe updated successfully!');
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        const err = await updateResponse.json();
+                        alert('Error: ' + err.message);
+                    }
+                });
+            } catch (error) {
+                console.error(error);
+                alert('Error loading recipe details');
+                window.location.href = 'dashboard.html';
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Recipes | Asian Food Explorer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
+    <style>
+        .filter-container {
+            margin-bottom: 40px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            background: var(--card-bg);
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: #000a2d;
+            box-shadow: var(--glow);
+            border-color: transparent;
+        }
+
+        .search-container {
+            max-width: 500px;
+            margin: 0 auto 30px;
+            position: relative;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 15px 25px 15px 50px;
+            border-radius: 30px;
+            background: var(--card-bg);
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="glass">
+        <div class="logo">Asian<span>Food</span></div>
+        <div class="nav-toggle" id="navToggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="nav-menu">
+            <!-- Dynamic Navbar via auth.js -->
+        </div>
+    </nav>
+
+    <section class="browse-header" style="text-align: center; padding-top: 60px; padding-bottom: 20px;">
+        <h1>Explore <span style="color: var(--primary);">Asian</span> Flavors</h1>
+        <p>Discover traditional and modern recipes from across the continent</p>
+    </section>
+
+    <div class="search-container">
+        <i class="fas fa-search"></i>
+        <input type="text" id="recipeSearch" placeholder="Search by name or ingredients...">
+    </div>
+
+    <div class="filter-container">
+        <button class="filter-btn active" data-cuisine="All">All</button>
+        <button class="filter-btn" data-cuisine="Thai">Thai</button>
+        <button class="filter-btn" data-cuisine="Japanese">Japanese</button>
+        <button class="filter-btn" data-cuisine="Chinese">Chinese</button>
+        <button class="filter-btn" data-cuisine="Korean">Korean</button>
+        <button class="filter-btn" data-cuisine="Vietnamese">Vietnamese</button>
+        <button class="filter-btn" data-cuisine="Indian">Indian</button>
+    </div>
+
+    <section id="recipes-list-all">
+        <div class="recipe-grid" id="recipe-listing-container">
+            <div class="loading-state" style="text-align: center; grid-column: 1/-1; padding: 40px;">
+                <i class="fas fa-spinner fa-spin fa-2x"></i>
+                <p style="margin-top: 15px;">Loading amazing recipes...</p>
+            </div>
+        </div>
+    </section>
+
+    <div id="notification"></div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const container = document.getElementById('recipe-listing-container');
+            const searchInput = document.getElementById('recipeSearch');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+
+            let allRecipes = [];
+            let currentFilter = 'All';
+
+            const fetchRecipes = async () => {
+                try {
+                    const baseURL = window.authManager?.baseURL || 'http://localhost:5050/api';
+                    const response = await fetch(`${baseURL}/recipes`);
+                    allRecipes = await response.json();
+                    renderRecipes(allRecipes);
+                } catch (error) {
+                    console.error('Error fetching recipes:', error);
+                    container.innerHTML = '<p style="text-align: center; grid-column: 1/-1;">Failed to load recipes. Please try again later.</p>';
+                }
+            };
+
+            const renderRecipes = (recipes) => {
+                if (recipes.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; grid-column: 1/-1; padding: 40px;">
+                            <i class="fas fa-utensils fa-3x" style="color: var(--glass-border); margin-bottom: 20px;"></i>
+                            <h3>No recipes found</h3>
+                            <p>Try a different search or filter.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = recipes.map(recipe => `
+                    <div class="recipe-card glass">
+                        <img src="${recipe.image || 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=1000'}" alt="${recipe.title}">
+                        <div class="badge">${recipe.cuisineType}</div>
+                        <h3>${recipe.title}</h3>
+                        <p>${recipe.description.substring(0, 80)}...</p>
+                        <a href="recipe-detail.html?id=${recipe._id}" class="btn btn-primary" style="margin-top: 15px;">View Recipe</a>
+                    </div>
+                `).join('');
+            };
+
+            const filterAndSearch = () => {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                const keywords = searchTerm ? searchTerm.split(/\s+/) : [];
+
+                const scored = allRecipes.map(recipe => {
+                    let score = 0;
+                    const title = (recipe.title || '').toLowerCase();
+                    const desc = (recipe.description || '').toLowerCase();
+                    const cuisine = (recipe.cuisineType || '').toLowerCase();
+                    const ingredients = (recipe.ingredients || []).map(i => i.toLowerCase()).join(' ');
+                    const allText = `${title} ${desc} ${cuisine} ${ingredients}`;
+
+                    // Search match
+                    if (keywords.length > 0) {
+                        keywords.forEach(word => {
+                            if (title.includes(word)) score += 10;
+                            if (cuisine.includes(word)) score += 5;
+                            if (ingredients.includes(word)) score += 3;
+                            if (desc.includes(word)) score += 1;
+                        });
+                        if (keywords.every(word => allText.includes(word))) score += 20;
+                    } else {
+                        score = 1; // Default score if no keywords
+                    }
+
+                    // Filter match
+                    const matchesFilter = currentFilter === 'All' || recipe.cuisineType === currentFilter;
+                    if (!matchesFilter) score = 0;
+
+                    return { ...recipe, score };
+                });
+
+                const filtered = scored
+                    .filter(recipe => recipe.score > 0)
+                    .sort((a, b) => b.score - a.score);
+
+                renderRecipes(filtered);
+            };
+
+            searchInput.addEventListener('input', filterAndSearch);
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = btn.dataset.cuisine;
+                    filterAndSearch();
+                });
+            });
+
+            await fetchRecipes();
+        });
+    </script>
+</body>
+
+</html>

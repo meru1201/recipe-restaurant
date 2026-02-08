@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | Asian Food Explorer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
+</head>
+
+<body>
+    <nav class="glass">
+        <div class="logo">Asian<span>Food</span></div>
+        <div class="nav-toggle" id="navToggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="nav-menu">
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="#" class="btn btn-outline" id="logoutBtn">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="profile-container">
+        <div class="glass" style="max-width: 600px; margin: 50px auto; padding: 40px;">
+            <h2>User Profile</h2>
+            <p>Update your personal information</p>
+
+            <div class="profile-pic-section" style="text-align: center; margin-bottom: 30px; position: relative;">
+                <img id="profilePreview" src="https://ui-avatars.com/api/?name=User&background=667eea&color=fff"
+                    alt="Profile Preview"
+                    style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary); margin-bottom: 15px;">
+                <div style="display: flex; justify-content: center; gap: 10px; margin-top: 10px;">
+                    <button type="button" class="btn btn-primary btn-sm"
+                        onclick="document.getElementById('profileImageInput').click()">
+                        <i class="fas fa-camera"></i> Change Photo
+                    </button>
+                    <button type="button" id="deletePicBtn" class="btn btn-outline btn-sm" style="display: none;">
+                        <i class="fas fa-trash"></i> Remove
+                    </button>
+                </div>
+                <input type="file" id="profileImageInput" accept="image/*" style="display: none;">
+            </div>
+
+            <form id="profileForm">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" id="profileUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Personal Bio</label>
+                    <textarea name="bio" id="profileBio" rows="3"
+                        placeholder="Tell us about your culinary journey..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" name="email" id="profileEmail" required disabled>
+                    <small>Email cannot be changed</small>
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <input type="text" id="profileRole" disabled>
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Save Changes</button>
+                    <a href="dashboard.html" class="btn btn-outline" style="flex: 1; text-align: center;">Back to
+                        Dashboard</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="notification"></div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = JSON.parse(localStorage.getItem('user'));
+            const fileInput = document.getElementById('profileImageInput');
+            const previewImg = document.getElementById('profilePreview');
+            const deleteBtn = document.getElementById('deletePicBtn');
+            const bioInput = document.getElementById('profileBio');
+            const profileForm = document.getElementById('profileForm');
+
+            const updatePreview = (url, name) => {
+                // If it's a base64 string from reader, use it directly. If it's a URL from backend, use it.
+                // If neither, use ui-avatars.
+                previewImg.src = url || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'User')}&background=667eea&color=fff`;
+
+                // Show delete button if it's NOT the default avatar
+                const isDefault = previewImg.src.includes('ui-avatars.com');
+                deleteBtn.style.display = isDefault ? 'none' : 'block';
+            };
+
+            if (user) {
+                document.getElementById('profileUsername').value = user.username || '';
+                document.getElementById('profileEmail').value = user.email || '';
+                document.getElementById('profileRole').value = (user.role || 'USER').toUpperCase();
+                bioInput.value = user.bio || '';
+                updatePreview(user.profileImage, user.username);
+            }
+
+            // Handle file selection and preview
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        previewImg.src = e.target.result;
+                        deleteBtn.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            deleteBtn.addEventListener('click', () => {
+                fileInput.value = '';
+                updatePreview('', document.getElementById('profileUsername').value);
+            });
+
+            profileForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const username = document.getElementById('profileUsername').value;
+                const bio = document.getElementById('profileBio').value;
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+                // Use FormData for file upload
+                const formData = new FormData();
+                formData.append('username', username);
+                formData.append('bio', bio);
+
+                const isDefault = previewImg.src.includes('ui-avatars.com');
+
+                if (fileInput.files[0]) {
+                    formData.append('profileImage', fileInput.files[0]);
+                } else if (deleteBtn.style.display === 'none') {
+                    // If delete button is hidden, it means the user clicked 'Remove'
+                    // or it was already default. Send empty string to remove from DB.
+                    formData.append('profileImage', '');
+                }
+
+                try {
+                    const response = await fetch(`${window.dashboardManager.baseURL}/users/profile`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const updatedUser = await response.json();
+                        localStorage.setItem('user', JSON.stringify(updatedUser));
+                        window.authManager.showNotification('Profile updated successfully!', 'success');
+
+                        if (window.authManager) {
+                            window.authManager.user = updatedUser;
+                            window.authManager.updateNavbar(true);
+                        }
+                        updatePreview(updatedUser.profileImage, updatedUser.username);
+                    } else {
+                        const err = await response.json();
+                        window.authManager.showNotification(err.message || 'Failed to update profile', 'error');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    window.authManager.showNotification('Network error. Please try again.', 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
