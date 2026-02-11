@@ -1,7 +1,7 @@
 // Dashboard Manager
 class DashboardManager {
     constructor() {
-        this.baseURL = 'http://127.0.0.1:5000/api';
+        this.baseURL = '/api';
         this.token = localStorage.getItem('token');
         this.user = JSON.parse(localStorage.getItem('user')) || null;
         this.init();
@@ -19,15 +19,15 @@ class DashboardManager {
 
     async loadDashboardData() {
         try {
-            // Load user profile
-            await this.loadUserProfile();
-
-            // Load user recipes & stats
-            await this.loadUserRecipes();
+            // Load data in parallel to avoid one hang blocking the other
+            await Promise.allSettled([
+                this.loadUserProfile(),
+                this.loadUserRecipes()
+            ]);
 
         } catch (error) {
-            console.error('Error loading dashboard data:', error);
-            this.showNotification('Failed to load dashboard data', 'error');
+            console.error('Error in loadDashboardData:', error);
+            this.showNotification('Some dashboard data failed to load', 'error');
         }
     }
 
@@ -70,11 +70,13 @@ class DashboardManager {
 
     async loadUserRecipes() {
         try {
-            const response = await fetch(`${this.baseURL}/recipes`);
-            const allRecipes = await response.json();
-
-            // Filter recipes belonging to the current user
-            const userRecipes = allRecipes.filter(r => r.author?._id === this.user.id || r.author === this.user.id);
+            // Use the dedicated 'my' recipes endpoint as per reqs
+            const baseURL = window.authManager?.baseURL || this.baseURL;
+            const response = await fetch(`${baseURL}/recipes/my`, {
+                headers: { 'Authorization': `Bearer ${this.token}` }
+            });
+            if (!response.ok) throw new Error('Failed to fetch your recipes');
+            const userRecipes = await response.json();
 
             this.displayUserRecipes(userRecipes);
 

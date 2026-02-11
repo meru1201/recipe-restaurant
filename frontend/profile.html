@@ -140,8 +140,8 @@
 
                 const jsonData = {
                     username: username,
-                    bio: bio
-                    // email is disabled in form
+                    bio: bio,
+                    profileImage: previewImg.src.startsWith('data:') ? previewImg.src : (previewImg.src.includes('ui-avatars') ? '' : previewImg.src)
                 };
 
                 try {
@@ -156,16 +156,16 @@
 
                     if (response.ok) {
                         const updatedUser = await response.json();
-                        // Maintain the existing profile image or fallback, since backend didn't update it
-                        updatedUser.profileImage = user.profileImage; 
-                        
+
+                        // Sync with local storage and managers
                         localStorage.setItem('user', JSON.stringify(updatedUser));
-                        window.authManager.showNotification('Profile updated successfully!', 'success');
 
                         if (window.authManager) {
                             window.authManager.user = updatedUser;
                             window.authManager.updateNavbar(true);
                         }
+
+                        window.authManager.showNotification('Profile updated successfully!', 'success');
                         updatePreview(updatedUser.profileImage, updatedUser.username);
                     } else {
                         const err = await response.json();

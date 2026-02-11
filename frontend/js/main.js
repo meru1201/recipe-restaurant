@@ -5,7 +5,7 @@ class App {
     }
 
     init() {
-        this.baseURL = 'http://127.0.0.1:5000/api';
+        this.baseURL = '/api';
         this.allRecipes = []; // Store recipes for search
         this.setupMobileMenu();
         this.loadRecipes();
@@ -15,7 +15,8 @@ class App {
     }
 
     async loadRecipes(filteredRecipes = null) {
-        const recipeList = document.getElementById('recipe-list');
+        // Try multiple selectors to support different page structures
+        const recipeList = document.getElementById('recipe-list') || document.getElementById('recipe-listing-container');
         if (!recipeList) return;
 
         try {
@@ -38,7 +39,11 @@ class App {
                         <a href="recipe-detail.html?id=${recipe._id}" class="btn btn-primary" style="margin-top: 15px;">View Recipe</a>
                     </div>
                 `).join('');
-                this.setupAnimations(); // Re-run animations for new elements
+
+                // Re-initialize animations for new elements
+                if (typeof this.setupAnimations === 'function') {
+                    this.setupAnimations();
+                }
             } else {
                 recipeList.innerHTML = `
                     <div class="empty-state" style="text-align: center; grid-column: 1/-1; padding: 40px;">

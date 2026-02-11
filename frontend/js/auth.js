@@ -1,7 +1,7 @@
 // Authentication Manager
 class AuthManager {
     constructor() {
-        this.baseURL = 'http://127.0.0.1:5000/api';
+        this.baseURL = '/api';
         this.token = localStorage.getItem('token');
         this.user = JSON.parse(localStorage.getItem('user')) || null;
         this.init();
@@ -183,6 +183,7 @@ class AuthManager {
 
     async handleLogin(e) {
         e.preventDefault();
+        console.log('Login attempt started...');
 
         const form = e.target;
         const email = form.email.value.trim();
