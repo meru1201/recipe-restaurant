@@ -92,17 +92,17 @@ The application is deployed and available at:
 ## 📸 Screenshots
 
 ### 🏠 Landing Page
-![Landing Page](/Users/birkhanym/.gemini/antigravity/brain/ea572970-c454-43eb-82c5-eb232ec019f5/landing_page_1770874748159.png)
+![Landing Page](screenshots/landing_page.png)
 *Modern hero section with active search functionality.*
 
 ### 📚 Recipes Listing
-![Recipes Page](/Users/birkhanym/.gemini/antigravity/brain/ea572970-c454-43eb-82c5-eb232ec019f5/recipes_page_1770874766337.png)
+![Recipes Page](screenshots/recipes_page.png)
 *Browse and filter authentic Asian dishes by category.*
 
 ### 🔐 Authentication (Login & Register)
 ````carousel
-![Login Page](/Users/birkhanym/.gemini/antigravity/brain/ea572970-c454-43eb-82c5-eb232ec019f5/login_page_1770874863508.png)
+![Login Page](screenshots/login_page.png)
 <!-- slide -->
-![Register Page](/Users/birkhanym/.gemini/antigravity/brain/ea572970-c454-43eb-82c5-eb232ec019f5/register_page_1770874917979.png)
+![Register Page](screenshots/register_page.png)
 ````
 *Secure authentication flow with glassmorphism design.*
